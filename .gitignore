@@ -1,0 +1,19 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Local config & secrets (never commit real values)
+**/variables.ps1
+**/.env
+**/agent-versions.json
+
+# Build / logs
+**/build.log
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db

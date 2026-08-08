@@ -1,0 +1,1 @@
+"""Scenario handlers with a common async handle(message) contract."""

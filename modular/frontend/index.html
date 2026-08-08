@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A2A Foundry Switchboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div>
+        <p class="eyebrow">Microsoft Foundry / A2A</p>
+        <h1>Switchboard</h1>
+      </div>
+      <div class="live-state"><span></span> Demo ready</div>
+    </header>
+
+    <section class="workspace">
+      <aside class="scenario-panel" aria-label="Choose routing scenario">
+        <div class="panel-heading">
+          <p class="eyebrow">Routing mode</p>
+          <p>Same request. Four implementations.</p>
+        </div>
+        <div class="scenario-list" role="radiogroup">
+          <button class="scenario active" data-scenario="1" role="radio" aria-checked="true">
+            <span class="scenario-number">01</span>
+            <span><strong>Portal A2A</strong><small>Foundry router + 2 Foundry agents</small></span>
+          </button>
+          <button class="scenario" data-scenario="2" role="radio" aria-checked="false">
+            <span class="scenario-number">02</span>
+            <span><strong>Pro-code</strong><small>Agent Framework + Foundry agents</small></span>
+          </button>
+          <button class="scenario" data-scenario="3a" role="radio" aria-checked="false">
+            <span class="scenario-number">3A</span>
+            <span><strong>Hybrid code router</strong><small>Foundry + in-code specialist</small></span>
+          </button>
+          <button class="scenario" data-scenario="3b" role="radio" aria-checked="false">
+            <span class="scenario-number">3B</span>
+            <span><strong>Hybrid Foundry router</strong><small>Foundry + A2A code server</small></span>
+          </button>
+        </div>
+
+        <details class="compare">
+          <summary>Compare all modes</summary>
+          <table>
+            <thead><tr><th>Mode</th><th>Router</th><th>Billing</th><th>Tech</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Foundry</td><td>Foundry</td><td>Foundry</td></tr>
+              <tr><td>2</td><td>Code</td><td>Foundry</td><td>Foundry</td></tr>
+              <tr><td>3a</td><td>Code</td><td>Foundry</td><td>In-code</td></tr>
+              <tr><td>3b</td><td>Foundry</td><td>Foundry</td><td>Code A2A</td></tr>
+            </tbody>
+          </table>
+        </details>
+      </aside>
+
+      <section class="conversation" aria-label="Agent conversation">
+        <div class="conversation-head">
+          <div>
+            <p class="eyebrow">Active line</p>
+            <h2 id="mode-title">Portal A2A</h2>
+            <div class="live-arch" id="live-arch"></div>
+          </div>
+          <div class="route-map" aria-label="Router and specialist status">
+            <span class="node user-node"><i data-lucide="user"></i></span>
+            <span class="wire"></span>
+            <span class="node router-node"><i data-lucide="network"></i></span>
+            <span class="wire"></span>
+            <span class="node specialist-node"><i data-lucide="headphones"></i></span>
+          </div>
+        </div>
+
+        <div id="messages" class="messages" aria-live="polite">
+          <div class="empty-state">
+            <span class="pulse-ring"><i data-lucide="phone-call"></i></span>
+            <h3>Place a request</h3>
+            <p>The operator will transfer it to Billing or Tech Support.</p>
+          </div>
+        </div>
+
+        <div class="suggestions" aria-label="Example requests">
+          <button data-prompt="I was charged twice for invoice #4471.">Duplicate charge</button>
+          <button data-prompt="I can't log in because my password expired.">Password expired</button>
+        </div>
+
+        <form id="chat-form" class="composer">
+          <label class="sr-only" for="message">Message</label>
+          <textarea id="message" rows="1" maxlength="4000" placeholder="Describe the issue..." required></textarea>
+          <button id="send" type="submit" title="Send request" aria-label="Send request"><i data-lucide="arrow-up"></i></button>
+        </form>
+      </section>
+
+      <aside class="trace-panel" aria-label="Routing trace">
+        <div class="panel-heading">
+          <p class="eyebrow">Call trace</p>
+          <p id="agent-label">Waiting for a request</p>
+        </div>
+        <ol id="trace" class="trace-list">
+          <li class="trace-muted">Route events appear here.</li>
+        </ol>
+      </aside>
+    </section>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>
