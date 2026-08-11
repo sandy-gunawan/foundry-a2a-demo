@@ -285,7 +285,8 @@ Rename it to `Classify` (click the title).
 ```json
 {
   "model": "<MODEL>",
-  "input": "Classify the user's intent. Reply with only one of: billing, techsupport, other.\n\nUser message: @{triggerBody()?['message']}",
+  "instructions": "You are an intent classifier. Reply with only one of: billing, techsupport, other.",
+  "input": "@{triggerBody()?['message']}",
   "text": {
     "format": {
       "type": "json_schema",
@@ -302,6 +303,10 @@ Rename it to `Classify` (click the title).
   }
 }
 ```
+
+> 💡 **`instructions` vs `input`:** `instructions` is the model's system prompt (its
+> rules/role); `input` is the raw user message. Keeping them separate is cleaner and
+> a bit safer than putting both in `input`.
 
 **④ This creates:** a classification response, **used by** the next step (`Set Intent`)
 to pick the department.
@@ -579,7 +584,8 @@ Then open **Development Tools → Run history** → the latest run → every act
           "authentication": { "type": "ManagedServiceIdentity", "audience": "https://ai.azure.com" },
           "body": {
             "model": "<MODEL>",
-            "input": "Classify the user's intent. Reply with only one of: billing, techsupport, other.\n\nUser message: @{triggerBody()?['message']}",
+            "instructions": "You are an intent classifier. Reply with only one of: billing, techsupport, other.",
+            "input": "@{triggerBody()?['message']}",
             "text": {
               "format": {
                 "type": "json_schema",
