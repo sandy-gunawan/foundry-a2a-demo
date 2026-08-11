@@ -22,8 +22,9 @@ param(
 $ErrorActionPreference = "Stop"
 
 if (-not $LogicAppUrl) {
-    Write-Host "LOGIC_APP_URL is not set. Run:  `$env:LOGIC_APP_URL = '<your trigger URL>'  then re-run." -ForegroundColor Yellow
-    exit 1
+    $LogicAppUrl = "SET_IN_PORTAL"
+    Write-Host "LOGIC_APP_URL not set - deploying with a placeholder." -ForegroundColor Yellow
+    Write-Host "After deploy, set the real URL in the portal: Container App -> Settings -> Secrets -> 'logic-app-url' -> then restart the revision." -ForegroundColor Yellow
 }
 
 Write-Host "==> Ensuring resource group '$ResourceGroup' exists..." -ForegroundColor Cyan

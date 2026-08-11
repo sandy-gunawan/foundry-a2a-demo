@@ -69,6 +69,24 @@ az containerapp secret set -n ca-logicapp-playground -g rg_a2a_foundry --secrets
 az containerapp revision restart -n ca-logicapp-playground -g rg_a2a_foundry
 ```
 
+### Configure the URL in the Azure portal (no CLI, no rebuild)
+You can deploy first (even without setting `LOGIC_APP_URL` — it deploys with a
+placeholder) and set the real URL in the portal so everyone using the public app
+gets it:
+
+1. **Azure portal** → open the Container App **`ca-logicapp-playground`**.
+2. **Settings → Secrets** → add/edit a secret named **`logic-app-url`** → paste your
+   trigger URL → **Save**. (Storing it as a *secret* hides the `sig=` value.)
+3. **Application → Containers → Edit and deploy** → **Environment variables** →
+   ensure **`LOGIC_APP_URL`** = **Reference a secret** → `logic-app-url` →
+   **Save** (this creates a new revision).
+4. The new revision restarts automatically. Anyone with the app's public URL can
+   now chat — they all use the URL you configured.
+
+> 🔓 The app has **external ingress and no sign-in**, so anyone with the URL can
+> use it. That's fine for a shared demo; add authentication before real production.
+
+
 ## Try these
 - `I was double charged on my last invoice` → routes to **agt-billing**
 - `I can't log in to my account` → routes to **agt-techsupport**

@@ -26,8 +26,11 @@ st.set_page_config(page_title="Foundry Router Playground", page_icon="🛎️")
 st.title("🛎️ Foundry Router Playground")
 st.caption("Type a message; it is classified and routed to the matching Foundry agent.")
 
-if not LOGIC_APP_URL:
-    st.error("LOGIC_APP_URL is not set. Add it to a local .env file (see .env.example).")
+if not LOGIC_APP_URL or not LOGIC_APP_URL.startswith("http"):
+    st.error(
+        "LOGIC_APP_URL is not configured yet. Set it in the Container App "
+        "(Settings -> Secrets -> 'logic-app-url'), or in a local .env file."
+    )
     st.stop()
 
 if "messages" not in st.session_state:
