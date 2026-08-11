@@ -637,7 +637,13 @@ Then open **Development Tools → Run history** → the latest run → every act
                 "runAfter": { "CallBilling": ["Succeeded"] },
                 "inputs": {
                   "statusCode": 200,
-                  "body": "@last(body('CallBilling')?['output'])?['content']?[0]?['text']"
+                  "body": {
+                    "intent": "@variables('intent')",
+                    "agent": "agt-billing",
+                    "answer": "@last(body('CallBilling')?['output'])?['content']?[0]?['text']",
+                    "model": "@body('CallBilling')?['model']",
+                    "usage": "@body('CallBilling')?['usage']"
+                  }
                 }
               },
               "Reply_billing_error": {
@@ -672,7 +678,13 @@ Then open **Development Tools → Run history** → the latest run → every act
                 "runAfter": { "CallTech": ["Succeeded"] },
                 "inputs": {
                   "statusCode": 200,
-                  "body": "@last(body('CallTech')?['output'])?['content']?[0]?['text']"
+                  "body": {
+                    "intent": "@variables('intent')",
+                    "agent": "agt-techsupport",
+                    "answer": "@last(body('CallTech')?['output'])?['content']?[0]?['text']",
+                    "model": "@body('CallTech')?['model']",
+                    "usage": "@body('CallTech')?['usage']"
+                  }
                 }
               },
               "Reply_tech_error": {
@@ -693,7 +705,12 @@ Then open **Development Tools → Run history** → the latest run → every act
               "runAfter": {},
               "inputs": {
                 "statusCode": 200,
-                "body": "Sorry, I couldn't determine how to help. Please rephrase."
+                "body": {
+                  "intent": "@variables('intent')",
+                  "agent": "",
+                  "answer": "Sorry, I couldn't determine how to help. Please rephrase.",
+                  "usage": {}
+                }
               }
             }
           }
