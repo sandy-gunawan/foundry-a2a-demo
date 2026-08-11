@@ -42,12 +42,38 @@ Opens a browser chat page. The URL stays in `.env`, never in the page.
 
 ---
 
+---
+
+## Option 3 — Host `playground.py` on Azure Container Apps
+Same Streamlit app, running in the cloud on a shareable URL. The Logic App URL is a
+**configurable ACA secret** — change it anytime without rebuilding the image.
+
+```powershell
+# 1) Set the trigger URL (kept as a secret, never baked into the image)
+$env:LOGIC_APP_URL = "<paste-your-trigger-URL>"
+
+# 2) Build + deploy to rg_a2a_foundry (all names are overridable params)
+pwsh -File .\deploy-aca.ps1
+```
+The script prints the public URL, e.g. `https://ca-logicapp-playground.<hash>.southeastasia.azurecontainerapps.io`.
+
+Override any default if needed:
+```powershell
+pwsh -File .\deploy-aca.ps1 -ResourceGroup rg_a2a_foundry -Registry acra2asg0808x7q2 `
+  -Environment acae-a2a-foundry -AppName ca-logicapp-playground
+```
+
+Change the Logic App URL later (no rebuild):
+```powershell
+az containerapp secret set -n ca-logicapp-playground -g rg_a2a_foundry --secrets logic-app-url="<new-url>"
+az containerapp revision restart -n ca-logicapp-playground -g rg_a2a_foundry
+```
+
 ## Try these
 - `I was double charged on my last invoice` → routes to **agt-billing**
 - `I can't log in to my account` → routes to **agt-techsupport**
 - `What's the weather?` → **Default** fallback
 
 ## Notes
-- These are for **testing/demo**, not production auth.
-- A browser-hosted **web** version (deployable to Azure Container Apps) lives in
-  [`../webapp/`](../webapp/) once created.
+- These are for **testing/demo**, not production auth (anyone with the ACA URL can chat).
+- Configuration is via **`LOGIC_APP_URL`**: env var / `.env` locally, ACA **secret** in the cloud.
