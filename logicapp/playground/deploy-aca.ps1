@@ -14,18 +14,11 @@ param(
     [string]$Registry      = "acra2asg0808x7q2",       # existing ACR (name only)
     [string]$Environment   = "acae-a2a-foundry",       # existing Container Apps environment
     [string]$AppName       = "ca-logicapp-playground",
-    [string]$ImageTag      = "logicapp-playground:v1",
-    [string]$TargetPort    = "8501",
-    [string]$LogicAppUrl   = $env:LOGIC_APP_URL
+    [string]$ImageTag      = "logicapp-playground:v2",
+    [string]$TargetPort    = "8501"
 )
 
 $ErrorActionPreference = "Stop"
-
-if (-not $LogicAppUrl) {
-    $LogicAppUrl = "SET_IN_PORTAL"
-    Write-Host "LOGIC_APP_URL not set - deploying with a placeholder." -ForegroundColor Yellow
-    Write-Host "After deploy, set the real URL in the portal: Container App -> Settings -> Secrets -> 'logic-app-url' -> then restart the revision." -ForegroundColor Yellow
-}
 
 Write-Host "==> Ensuring resource group '$ResourceGroup' exists..." -ForegroundColor Cyan
 az group create --name $ResourceGroup --location $Location --only-show-errors | Out-Null
@@ -56,18 +49,14 @@ if (-not $exists) {
         --registry-server $acrLoginServer `
         --registry-username $acrUser `
         --registry-password $acrPass `
-        --secrets "logic-app-url=$LogicAppUrl" `
-        --env-vars "LOGIC_APP_URL=secretref:logic-app-url" `
         --min-replicas 1 --max-replicas 2 `
         --only-show-errors | Out-Null
 }
 else {
     Write-Host "==> Updating existing Container App '$AppName'..." -ForegroundColor Cyan
-    az containerapp secret set --name $AppName --resource-group $ResourceGroup `
-        --secrets "logic-app-url=$LogicAppUrl" --only-show-errors | Out-Null
     az containerapp update --name $AppName --resource-group $ResourceGroup `
         --image $fullImage `
-        --set-env-vars "LOGIC_APP_URL=secretref:logic-app-url" `
+        --remove-env-vars LOGIC_APP_URL `
         --only-show-errors | Out-Null
 }
 
@@ -76,6 +65,4 @@ Write-Host ""
 Write-Host "Deployed. Open the playground at:" -ForegroundColor Green
 Write-Host "  https://$fqdn" -ForegroundColor Green
 Write-Host ""
-Write-Host "To change the Logic App URL later (no rebuild):" -ForegroundColor DarkGray
-Write-Host "  az containerapp secret set -n $AppName -g $ResourceGroup --secrets logic-app-url='<new-url>'" -ForegroundColor DarkGray
-Write-Host "  az containerapp revision restart -n $AppName -g $ResourceGroup" -ForegroundColor DarkGray
+Write-Host "Set the Logic App URL from the app's Settings sidebar (top-left >) - no env, no redeploy." -ForegroundColor DarkGray

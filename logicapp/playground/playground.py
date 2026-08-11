@@ -1,4 +1,4 @@
-"""Streamlit chat playground for the Foundry Router Logic App.
+r"""Streamlit chat playground for the Foundry Router Logic App.
 
 Run:
     python -m venv .venv
@@ -8,10 +8,13 @@ Run:
     #   LOGIC_APP_URL=https://prod-XX.<region>.logic.azure.com:443/workflows/.../invoke?...&sig=...
     streamlit run playground.py
 
-The URL is read from the LOGIC_APP_URL environment variable (or a local .env),
-so the secret never lives in the page or the repo.
+The Logic App URL is configured from the app's own Settings sidebar (stored on the
+server so everyone using the page shares it). It also falls back to a LOGIC_APP_URL
+env var / local .env if you prefer.
 """
+import json
 import os
+from pathlib import Path
 
 import requests
 import streamlit as st
@@ -19,18 +22,48 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-LOGIC_APP_URL = os.environ.get("LOGIC_APP_URL", "")
+CONFIG_PATH = Path(os.environ.get("CONFIG_PATH", "/tmp/playground_config.json"))
 REQUEST_TIMEOUT_SECONDS = 120
 
+
+def load_saved_url() -> str:
+    """Read the shared URL from the config file, falling back to an env var."""
+    if CONFIG_PATH.exists():
+        try:
+            return json.loads(CONFIG_PATH.read_text()).get("logic_app_url", "")
+        except (json.JSONDecodeError, OSError):
+            pass
+    return os.environ.get("LOGIC_APP_URL", "")
+
+
+def save_url(url: str) -> None:
+    try:
+        CONFIG_PATH.write_text(json.dumps({"logic_app_url": url}))
+    except OSError as error:
+        st.sidebar.error(f"Could not save config: {error}")
+
+
 st.set_page_config(page_title="Foundry Router Playground", page_icon="🛎️")
+
+if "logic_app_url" not in st.session_state:
+    st.session_state.logic_app_url = load_saved_url()
+
+with st.sidebar:
+    st.header("⚙️ Settings")
+    st.caption("Paste your Logic App trigger URL, then Save. It is stored on the server and shared by everyone using this page.")
+    url_input = st.text_input("Logic App URL", value=st.session_state.logic_app_url, type="password")
+    if st.button("Save URL", use_container_width=True):
+        st.session_state.logic_app_url = url_input.strip()
+        save_url(st.session_state.logic_app_url)
+        st.success("Saved. Everyone using this page now uses this URL.")
+    st.caption("✅ URL is configured." if st.session_state.logic_app_url else "⚠️ No URL set yet.")
+
 st.title("🛎️ Foundry Router Playground")
 st.caption("Type a message; it is classified and routed to the matching Foundry agent.")
 
-if not LOGIC_APP_URL or not LOGIC_APP_URL.startswith("http"):
-    st.error(
-        "LOGIC_APP_URL is not configured yet. Set it in the Container App "
-        "(Settings -> Secrets -> 'logic-app-url'), or in a local .env file."
-    )
+logic_app_url = st.session_state.logic_app_url
+if not logic_app_url or not logic_app_url.startswith("http"):
+    st.info("Set your Logic App URL in the ⚙️ Settings sidebar (top-left ›) to start chatting.")
     st.stop()
 
 if "messages" not in st.session_state:
@@ -48,7 +81,7 @@ if prompt:
         with st.spinner("Routing to the right agent…"):
             try:
                 response = requests.post(
-                    LOGIC_APP_URL,
+                    logic_app_url,
                     json={"message": prompt},
                     timeout=REQUEST_TIMEOUT_SECONDS,
                 )

@@ -45,14 +45,11 @@ Opens a browser chat page. The URL stays in `.env`, never in the page.
 ---
 
 ## Option 3 — Host `playground.py` on Azure Container Apps
-Same Streamlit app, running in the cloud on a shareable URL. The Logic App URL is a
-**configurable ACA secret** — change it anytime without rebuilding the image.
+Same Streamlit app, running in the cloud on a shareable URL. You set the Logic App
+URL **inside the app** (⚙️ Settings sidebar) — no env var, no secret, no redeploy.
 
 ```powershell
-# 1) Set the trigger URL (kept as a secret, never baked into the image)
-$env:LOGIC_APP_URL = "<paste-your-trigger-URL>"
-
-# 2) Build + deploy to rg_a2a_foundry (all names are overridable params)
+# Build + deploy to rg_a2a_foundry (all names are overridable params)
 pwsh -File .\deploy-aca.ps1
 ```
 The script prints the public URL, e.g. `https://ca-logicapp-playground.<hash>.southeastasia.azurecontainerapps.io`.
@@ -63,28 +60,16 @@ pwsh -File .\deploy-aca.ps1 -ResourceGroup rg_a2a_foundry -Registry acra2asg0808
   -Environment acae-a2a-foundry -AppName ca-logicapp-playground
 ```
 
-Change the Logic App URL later (no rebuild):
-```powershell
-az containerapp secret set -n ca-logicapp-playground -g rg_a2a_foundry --secrets logic-app-url="<new-url>"
-az containerapp revision restart -n ca-logicapp-playground -g rg_a2a_foundry
-```
+### Set the URL (no CLI, no portal, no redeploy)
+1. Open the app's public URL.
+2. In the **⚙️ Settings** sidebar (use the top-left **›** to expand it), paste your
+   Logic App trigger URL → **Save URL**.
+3. It's stored on the server and shared by everyone using the page — start chatting.
 
-### Configure the URL in the Azure portal (no CLI, no rebuild)
-You can deploy first (even without setting `LOGIC_APP_URL` — it deploys with a
-placeholder) and set the real URL in the portal so everyone using the public app
-gets it:
-
-1. **Azure portal** → open the Container App **`ca-logicapp-playground`**.
-2. **Settings → Secrets** → add/edit a secret named **`logic-app-url`** → paste your
-   trigger URL → **Save**. (Storing it as a *secret* hides the `sig=` value.)
-3. **Application → Containers → Edit and deploy** → **Environment variables** →
-   ensure **`LOGIC_APP_URL`** = **Reference a secret** → `logic-app-url` →
-   **Save** (this creates a new revision).
-4. The new revision restarts automatically. Anyone with the app's public URL can
-   now chat — they all use the URL you configured.
-
-> 🔓 The app has **external ingress and no sign-in**, so anyone with the URL can
-> use it. That's fine for a shared demo; add authentication before real production.
+> 🔓 The app has **external ingress and no sign-in**, so anyone with the URL can use
+> it (and can see/replace the configured Logic App URL). Fine for a shared demo; add
+> authentication before real production. The saved URL resets if the container
+> restarts/redeploys — just paste it again.
 
 
 ## Try these
@@ -94,4 +79,5 @@ gets it:
 
 ## Notes
 - These are for **testing/demo**, not production auth (anyone with the ACA URL can chat).
-- Configuration is via **`LOGIC_APP_URL`**: env var / `.env` locally, ACA **secret** in the cloud.
+- Configuration: local runs use `LOGIC_APP_URL` (env/`.env`); the deployed app is
+  configured from its **⚙️ Settings sidebar** (stored server-side, shared by all users).
